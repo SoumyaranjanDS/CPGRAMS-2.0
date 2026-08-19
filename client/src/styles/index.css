@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #0A0A0B;
+  --color-brand-secondary: #71717A;
+  --color-brand-accent: #2563EB;
+  --color-brand-accent-hover: #1D4ED8;
+  --color-brand-border: #E4E4E7;
+  --color-brand-bg: #FAFAFA;
+  --color-brand-surface: #FFFFFF;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Helvetica', Arial, sans-serif;
+}
+
+@layer base {
+  * {
+    border-color: #E4E4E7;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  body {
+    background-color: #FAFAFA;
+    color: #0A0A0B;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.011em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    color: #0A0A0B;
+  }
+}
+
+/* Professional Structure & Table Utilities */
+.table-row-hover {
+  transition: background-color 120ms ease;
+}
+.table-row-hover:hover {
+  background-color: #F4F4F5;
+}
+
+/* Minimal Input Focus */
+.minimal-input {
+  background-color: #FFFFFF;
+  border: 1px solid #E4E4E7;
+  transition: all 150ms ease;
+}
+.minimal-input:focus {
+  border-color: #0A0A0B;
+  outline: none;
+  box-shadow: 0 0 0 1px #0A0A0B;
+}
+
+/* Custom Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4D4D8;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #A1A1AA;
+}

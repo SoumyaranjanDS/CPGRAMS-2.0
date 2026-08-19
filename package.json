@@ -1,0 +1,29 @@
+{
+  "name": "cpgrams-redesign-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CPGRAMS 2.0 - Reimagining India's Public Grievance Digital Infrastructure",
+  "scripts": {
+    "dev": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build": "npm run build:server && npm run build:client",
+    "seed": "npm run seed --prefix server",
+    "port:kill": "npm run port:kill --prefix server"
+  },
+  "keywords": [
+    "cpgrams",
+    "public-grievance",
+    "e-governance",
+    "india-stack",
+    "darpg",
+    "react",
+    "nodejs",
+    "mongodb",
+    "tailwindv4"
+  ],
+  "author": "Soumya Ranjan",
+  "license": "MIT"
+}
