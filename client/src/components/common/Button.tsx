@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader2 } from 'lucide-react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'magenta' | 'saffron' | 'accent' | 'outline' | 'ghost' | 'danger' | 'success';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
@@ -21,27 +21,33 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.99] select-none text-sm tracking-tight';
+    'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer active:scale-[0.98] select-none text-sm tracking-tight';
 
   const sizeStyles = {
     sm: 'text-xs px-3 py-1.5 gap-1.5',
     md: 'text-sm px-4 py-2 gap-2',
-    lg: 'text-sm px-5 py-2.5 gap-2.5 font-semibold',
+    lg: 'text-base px-6 py-3.5 gap-2.5 shadow-xs',
   };
 
   const variantStyles = {
     primary:
-      'bg-[#0A0A0B] hover:bg-[#27272A] text-white shadow-xs',
+      'bg-[#2563EB] hover:bg-[#1D4ED8] text-white focus:ring-[#2563EB] shadow-xs',
+    magenta:
+      'bg-[#6F0047] hover:bg-[#580038] text-white focus:ring-[#6F0047] shadow-xs',
     secondary:
-      'bg-[#F4F4F5] hover:bg-[#E4E4E7] text-[#0A0A0B] border border-[#E4E4E7]',
+      'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 focus:ring-slate-400',
+    saffron:
+      'bg-[#FF9933] hover:bg-[#E67300] text-slate-950 font-bold focus:ring-[#FF9933] shadow-xs',
     accent:
-      'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-xs',
+      'bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-xs focus:ring-blue-500',
     outline:
-      'bg-transparent hover:bg-[#F4F4F5] text-[#0A0A0B] border border-[#E4E4E7]',
+      'bg-transparent hover:bg-slate-50 text-[#0A2540] border border-slate-300 focus:ring-slate-400',
     ghost:
-      'bg-transparent hover:bg-[#F4F4F5] text-[#0A0A0B]',
+      'bg-transparent hover:bg-slate-100 text-[#0A2540] focus:ring-slate-300',
     danger:
-      'bg-red-600 hover:bg-red-700 text-white shadow-xs',
+      'bg-[#DC2626] hover:bg-red-700 text-white shadow-xs focus:ring-red-500',
+    success:
+      'bg-[#059669] hover:bg-emerald-700 text-white shadow-xs focus:ring-emerald-500',
   };
 
   return (
