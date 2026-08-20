@@ -4,7 +4,20 @@ import { ComplaintStatus } from '../../types/index.js';
 export interface BadgeProps {
   children?: React.ReactNode;
   status?: ComplaintStatus;
-  variant?: 'neutral' | 'dark' | 'success' | 'warning' | 'error' | 'info';
+  variant?:
+    | 'neutral'
+    | 'dark'
+    | 'success'
+    | 'warning'
+    | 'error'
+    | 'info'
+    | 'saffron'
+    | 'emerald'
+    | 'crimson'
+    | 'slate'
+    | 'amber'
+    | 'blue'
+    | 'primary';
   size?: 'sm' | 'md';
   pulse?: boolean;
   className?: string;
@@ -18,61 +31,68 @@ export const Badge: React.FC<BadgeProps> = ({
   pulse = false,
   className = '',
 }) => {
-  let resolvedVariant = variant || 'neutral';
+  let resolvedVariant = variant || 'slate';
   let label = children;
 
   if (status) {
     switch (status) {
       case 'DRAFT':
-        resolvedVariant = 'neutral';
+        resolvedVariant = 'slate';
         label = label || 'Draft Saved';
         break;
       case 'SUBMITTED':
       case 'RECEIVED':
-        resolvedVariant = 'info';
+        resolvedVariant = 'blue';
         label = label || 'Submitted';
         break;
       case 'ASSIGNED':
       case 'UNDER_REVIEW':
       case 'ACTION_IN_PROGRESS':
-        resolvedVariant = 'warning';
-        label = label || 'In Review';
+        resolvedVariant = 'amber';
+        label = label || 'In Progress';
         break;
       case 'ADDITIONAL_INFO_REQUIRED':
-        resolvedVariant = 'error';
+        resolvedVariant = 'saffron';
         label = label || 'Action Required';
         break;
       case 'RESOLVED':
       case 'CLOSED':
-        resolvedVariant = 'success';
+        resolvedVariant = 'emerald';
         label = label || 'Resolved';
         break;
       case 'RESOLUTION_DISPUTED':
       case 'APPEAL_SUBMITTED':
-        resolvedVariant = 'error';
-        label = label || 'In Appeal';
+        resolvedVariant = 'crimson';
+        label = label || 'Disputed / In Appeal';
         break;
       case 'APPEAL_RESOLVED':
-        resolvedVariant = 'success';
+        resolvedVariant = 'emerald';
         label = label || 'Appeal Resolved';
         break;
       default:
-        resolvedVariant = 'neutral';
+        resolvedVariant = 'slate';
     }
   }
 
   const variantStyles = {
-    neutral: 'bg-[#F4F4F5] text-[#52525B] border-[#E4E4E7]',
-    dark: 'bg-[#0A0A0B] text-white border-transparent',
-    success: 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]',
-    warning: 'bg-[#FFFBEB] text-[#92400E] border-[#FDE68A]',
-    error: 'bg-[#FFF1F2] text-[#9F1239] border-[#FECDD3]',
-    info: 'bg-[#EFF6FF] text-[#1E40AF] border-[#BFDBFE]',
+    primary: 'bg-[#0A2540]/10 text-[#0A2540] border-[#0A2540]/20',
+    saffron: 'bg-amber-50 text-amber-800 border-amber-300',
+    emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    crimson: 'bg-red-50 text-red-700 border-red-200',
+    slate: 'bg-slate-100 text-slate-700 border-slate-200',
+    neutral: 'bg-slate-100 text-slate-700 border-slate-200',
+    dark: 'bg-[#0A2540] text-white border-transparent',
+    success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+    warning: 'bg-amber-50 text-amber-800 border-amber-200',
+    error: 'bg-red-50 text-red-700 border-red-200',
+    info: 'bg-blue-50 text-blue-700 border-blue-200',
+    amber: 'bg-amber-50 text-amber-800 border-amber-200',
+    blue: 'bg-blue-50 text-blue-700 border-blue-200',
   };
 
   const sizeStyles = {
     sm: 'text-[11px] px-2 py-0.5 font-medium tracking-tight',
-    md: 'text-xs px-2.5 py-0.5 font-medium tracking-tight',
+    md: 'text-xs px-2.5 py-0.5 font-semibold tracking-tight',
   };
 
   return (
@@ -80,25 +100,25 @@ export const Badge: React.FC<BadgeProps> = ({
       className={`inline-flex items-center gap-1.5 rounded-md border font-sans ${variantStyles[resolvedVariant]} ${sizeStyles[size]} ${className}`}
     >
       {pulse && (
-        <span className="relative flex h-1.5 w-1.5">
+        <span className="relative flex h-2 w-2">
           <span
             className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-              resolvedVariant === 'success'
+              resolvedVariant === 'emerald' || resolvedVariant === 'success'
                 ? 'bg-emerald-400'
-                : resolvedVariant === 'error'
-                ? 'bg-rose-400'
-                : resolvedVariant === 'warning'
+                : resolvedVariant === 'crimson' || resolvedVariant === 'error'
+                ? 'bg-red-400'
+                : resolvedVariant === 'amber' || resolvedVariant === 'saffron' || resolvedVariant === 'warning'
                 ? 'bg-amber-400'
                 : 'bg-blue-400'
             }`}
           ></span>
           <span
-            className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
-              resolvedVariant === 'success'
+            className={`relative inline-flex rounded-full h-2 w-2 ${
+              resolvedVariant === 'emerald' || resolvedVariant === 'success'
                 ? 'bg-emerald-600'
-                : resolvedVariant === 'error'
-                ? 'bg-rose-600'
-                : resolvedVariant === 'warning'
+                : resolvedVariant === 'crimson' || resolvedVariant === 'error'
+                ? 'bg-red-600'
+                : resolvedVariant === 'amber' || resolvedVariant === 'saffron' || resolvedVariant === 'warning'
                 ? 'bg-amber-600'
                 : 'bg-blue-600'
             }`}
