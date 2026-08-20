@@ -20,7 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({
   onLodgeClick,
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA] text-[#0A0A0B] selection:bg-[#2563EB] selection:text-white font-sans">
+    <div className="min-h-screen flex flex-col bg-white text-[#0A2540] font-sans w-full max-w-full overflow-x-hidden">
       <Navbar
         currentView={currentView}
         onNavigate={onNavigate}
@@ -28,7 +28,8 @@ export const Layout: React.FC<LayoutProps> = ({
         onLoginClick={onLoginClick}
         onLodgeClick={onLodgeClick}
       />
-      <main className="flex-1 pt-28 pb-16">{children}</main>
+      {/* pt-16 on mobile (h-16), pt-20 on sm+ (h-20) */}
+      <main className="flex-1 pt-16 sm:pt-20 pb-16 w-full max-w-full overflow-x-hidden">{children}</main>
       <Footer />
     </div>
   );
