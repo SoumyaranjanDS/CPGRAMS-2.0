@@ -1,48 +1,69 @@
 import React from 'react';
-import { ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, ShieldCheck, PhoneCall } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="mt-24 border-t border-[#E4E4E7] bg-white text-[#52525B] text-xs font-sans">
-      {/* Top Footer Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 pb-10 border-b border-[#E4E4E7]">
-          {/* Brand Col */}
-          <div className="md:col-span-2 space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-[#0A0A0B] text-white flex items-center justify-center font-bold text-[10px]">
+    <footer className="mt-20 border-t border-slate-200 bg-slate-50 text-slate-600 font-sans w-full max-w-full">
+      {/* Main Footer Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 space-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-10 lg:gap-12 pb-12 border-b border-slate-200 text-left">
+          
+          {/* Brand Column */}
+          <div className="md:col-span-2 space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#0A2540] text-white flex items-center justify-center font-black text-xs shadow-xs">
                 <span className="text-[#2563EB]">C</span>P
               </div>
-              <span className="font-bold text-sm text-[#0A0A0B] tracking-tight">
-                CPGRAMS 2.0
+              <span className="font-extrabold text-lg sm:text-xl text-[#0A2540] tracking-tight">
+                CPGRAMS <span className="text-[#6F0047]">2.0</span>
               </span>
             </div>
-            <p className="text-xs text-[#71717A] leading-relaxed max-w-sm">
+            <p className="text-sm text-slate-600 leading-relaxed max-w-sm font-normal">
               Centralised Public Grievance Redress and Monitoring System. Reimagined to deliver
               citizen-intent driven public service accountability across Indian Central & State
               departments.
             </p>
-            <div className="flex items-center gap-2 text-[11px] text-[#A1A1AA]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#059669]" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 font-medium pt-1">
+              <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
               <span>DARPG Statutory Redressal Infrastructure</span>
             </div>
           </div>
 
           {/* Col 1: Citizen Services */}
-          <div className="space-y-2.5">
-            <h4 className="font-semibold text-[#0A0A0B] text-xs tracking-tight">Citizen Portals</h4>
-            <ul className="space-y-1.5 text-xs text-[#71717A]">
-              <li><a href="#lodge" className="hover:text-[#0A0A0B] transition-colors">Lodge Public Grievance</a></li>
-              <li><a href="#track" className="hover:text-[#0A0A0B] transition-colors">Track Existing Reference</a></li>
-              <li><a href="#appeal" className="hover:text-[#0A0A0B] transition-colors">Statutory First Appeal</a></li>
-              <li><a href="#pin" className="hover:text-[#0A0A0B] transition-colors">PIN Code Authority Resolver</a></li>
+          <div className="space-y-4">
+            <h4 className="font-bold text-[#0A2540] text-sm sm:text-base tracking-tight">
+              Citizen Portals
+            </h4>
+            <ul className="space-y-2.5 text-sm text-slate-600">
+              <li>
+                <a href="#lodge" className="hover:text-[#2563EB] transition-colors">
+                  Lodge Complaint
+                </a>
+              </li>
+              <li>
+                <a href="#track" className="hover:text-[#2563EB] transition-colors">
+                  Track Status
+                </a>
+              </li>
+              <li>
+                <a href="#appeal" className="hover:text-[#2563EB] transition-colors">
+                  Statutory First Appeal
+                </a>
+              </li>
+              <li>
+                <a href="#directory" className="hover:text-[#2563EB] transition-colors">
+                  PIN Code Authority Lookup
+                </a>
+              </li>
             </ul>
           </div>
 
-          {/* Col 2: Statutory Compliance */}
-          <div className="space-y-2.5">
-            <h4 className="font-semibold text-[#0A0A0B] text-xs tracking-tight">Governance Norms</h4>
-            <ul className="space-y-1.5 text-xs text-[#71717A]">
+          {/* Col 2: Statutory Governance */}
+          <div className="space-y-4">
+            <h4 className="font-bold text-[#0A2540] text-sm sm:text-base tracking-tight">
+              Governance Norms
+            </h4>
+            <ul className="space-y-2.5 text-sm text-slate-600">
               <li>Standard 21-Day Redressal SLA</li>
               <li>Mandatory Officer ATR Upload</li>
               <li>3-Factor Anti-Fraud Verification</li>
@@ -51,40 +72,48 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Col 3: Helplines */}
-          <div className="space-y-2.5">
-            <h4 className="font-semibold text-[#0A0A0B] text-xs tracking-tight">Public Helplines</h4>
-            <div className="space-y-1 text-xs text-[#71717A]">
-              <p>National Toll-Free: <strong className="text-[#0A0A0B] font-mono">1800-11-4000</strong></p>
-              <p>Senior Support: <strong className="text-[#0A0A0B] font-mono">14567</strong></p>
-              <p>Emergency Response: <strong className="text-[#0A0A0B] font-mono">112</strong></p>
-              <div className="pt-1">
+          <div className="space-y-4">
+            <h4 className="font-bold text-[#0A2540] text-sm sm:text-base tracking-tight">
+              Public Helplines
+            </h4>
+            <div className="space-y-2 text-sm text-slate-600">
+              <p className="flex items-center gap-1.5">
+                <PhoneCall className="w-3.5 h-3.5 text-[#2563EB]" />
+                <span>Toll-Free:</span>
+                <strong className="text-[#0A2540] font-mono font-bold">1800-11-4000</strong>
+              </p>
+              <p>Senior Citizen Support: <strong className="text-[#0A2540] font-mono font-bold">14567</strong></p>
+              <p>Emergency Response: <strong className="text-[#0A2540] font-mono font-bold">112</strong></p>
+              <div className="pt-2">
                 <a
                   href="https://india.gov.in"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[#2563EB] hover:underline"
+                  className="inline-flex items-center gap-1 text-sm font-bold text-[#2563EB] hover:underline"
                 >
                   <span>National Portal of India</span>
-                  <ArrowUpRight className="w-3 h-3" />
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
               </div>
             </div>
           </div>
+
         </div>
 
         {/* Bottom Legal bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-[#71717A] text-[11px] gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between text-slate-500 text-xs sm:text-sm gap-4">
           <p>&copy; {new Date().getFullYear()} Government of India. Designed with citizen-intent principles.</p>
-          <div className="flex items-center gap-4">
-            <span className="hover:text-[#0A0A0B] cursor-pointer">Citizen Charter</span>
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-medium">
+            <span className="hover:text-[#0A2540] cursor-pointer">Citizen Charter</span>
             <span>&bull;</span>
-            <span className="hover:text-[#0A0A0B] cursor-pointer">Privacy Policy</span>
+            <span className="hover:text-[#0A2540] cursor-pointer">Privacy Policy</span>
             <span>&bull;</span>
-            <span className="hover:text-[#0A0A0B] cursor-pointer">Terms of Service</span>
+            <span className="hover:text-[#0A2540] cursor-pointer">Terms of Service</span>
             <span>&bull;</span>
-            <span className="hover:text-[#0A0A0B] cursor-pointer">Accessibility</span>
+            <span className="hover:text-[#0A2540] cursor-pointer">Accessibility</span>
           </div>
         </div>
+
       </div>
     </footer>
   );
