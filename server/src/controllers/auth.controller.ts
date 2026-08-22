@@ -6,7 +6,11 @@ import { cache } from '../config/redis.js';
 import { User, IUser } from '../models/User.js';
 import { AuthenticatedRequest } from '../middleware/auth.js';
 
-const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyBGtqdVoKgd9sCmz2Y8wxuwa0WfDBaymGk';
+const GOOGLE_MAPS_API_KEY =
+  env.GOOGLE_API_KEY ||
+  process.env.GOOGLE_API_KEY ||
+  process.env.VITE_GOOGLE_MAPS_API_KEY ||
+  '';
 
 /**
  * Controller: Register a new citizen account
