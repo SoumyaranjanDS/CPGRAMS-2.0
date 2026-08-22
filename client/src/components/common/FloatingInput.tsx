@@ -26,7 +26,7 @@ export const FloatingInput: React.FC<FloatingInputProps> = ({
     <div className="w-full text-left">
       <div className="relative flex items-center">
         {leftIcon && (
-          <div className="absolute left-3.5 text-slate-400 pointer-events-none z-10">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 pointer-events-none z-10">
             {leftIcon}
           </div>
         )}
@@ -37,7 +37,7 @@ export const FloatingInput: React.FC<FloatingInputProps> = ({
           placeholder=" "
           required={required}
           className={`peer w-full ${leftIcon ? 'pl-10' : 'pl-3.5'} ${
-            rightIcon ? 'pr-10' : 'pr-3.5'
+            rightIcon ? 'pr-11' : 'pr-3.5'
           } pt-3.5 pb-2.5 rounded-xl border ${
             error
               ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
@@ -58,13 +58,13 @@ export const FloatingInput: React.FC<FloatingInputProps> = ({
         </label>
 
         {rightIcon && (
-          <div className="absolute right-3.5 text-slate-400 z-10">
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 z-10">
             {rightIcon}
           </div>
         )}
       </div>
 
-      {error && <p className="text-xs text-red-600 font-medium mt-1 pl-1">{error}</p>}
+      {error && <p className="text-xs text-red-600 font-semibold mt-1 pl-1">{error}</p>}
     </div>
   );
 };
@@ -117,14 +117,14 @@ export const FloatingSelect: React.FC<FloatingSelectProps> = ({
           {label} {required && <span className="text-red-500 font-bold">*</span>}
         </label>
 
-        <div className="absolute right-3.5 pointer-events-none text-slate-400">
+        <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
           <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
             <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
           </svg>
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-600 font-medium mt-1 pl-1">{error}</p>}
+      {error && <p className="text-xs text-red-600 font-semibold mt-1 pl-1">{error}</p>}
     </div>
   );
 };
