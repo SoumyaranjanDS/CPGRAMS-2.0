@@ -14,6 +14,10 @@ const envSchema = z.object({
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
   CLIENT_URL: z.string().default('http://localhost:5173'),
   OPENAI_API_KEY: z.string().optional().default('mock_key_for_development'),
+  GOOGLE_API_KEY: z.string().optional().default(process.env.GOOGLE_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || ''),
+  GOOGLE_CLIENT_ID: z.string().optional().default(process.env.GOOGLE_CLIENT_ID || ''),
+  GOOGLE_CLIENT_SECRET: z.string().optional().default(process.env.GOOGLE_CLIENT_SECRET || ''),
+  GOOGLE_CALLBACK_URL: z.string().optional().default(process.env.GOOGLE_CALLBACK_URL || ''),
 });
 
 const _env = envSchema.safeParse(process.env);
