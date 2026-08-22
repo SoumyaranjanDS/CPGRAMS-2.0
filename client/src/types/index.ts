@@ -1,18 +1,24 @@
 export type UserRole = 'CITIZEN' | 'GRO_OFFICER' | 'APPELLATE_OFFICER' | 'ADMIN';
+export type UserGender = 'Male' | 'Female' | 'Transgender';
 
 export interface User {
   userId: string;
   name: string;
+  gender?: UserGender;
   phone: string;
+  phoneStd?: string;
   email?: string;
   role: UserRole;
   departmentId?: string;
   designation?: string;
   address?: {
-    pinCode: string;
-    locality: string;
-    district: string;
-    state: string;
+    premise?: string;
+    subLocality?: string;
+    locality?: string;
+    country?: string;
+    state?: string;
+    district?: string;
+    pinCode?: string;
   };
 }
 
