@@ -28,6 +28,7 @@ import {
   syncRemoteDraft,
   getSessionId,
 } from '../../services/draftStorage.js';
+import { useAuth } from '../../context/AuthContext.js';
 
 export interface IntakeWorkflowProps {
   initialNarrative?: string;
@@ -42,6 +43,8 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
   onCancel,
   onOpenVoiceModal,
 }) => {
+  const { user } = useAuth();
+
   const [step, setStep] = useState(1);
   const [narrative, setNarrative] = useState(initialNarrative);
   const [pinCode, setPinCode] = useState('751001');
@@ -50,11 +53,20 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
   const [landmark, setLandmark] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState<string>('DEP-OD-01');
   const [selectedDeptName, setSelectedDeptName] = useState<string>('Department of Social Security (SSEPD Odisha)');
-  const [citizenName, setCitizenName] = useState('Soumya Ranjan');
-  const [citizenPhone, setCitizenPhone] = useState('+91 98765 43210');
-  const [citizenEmail, setCitizenEmail] = useState('citizen@cpgrams.gov.in');
+  const [citizenName, setCitizenName] = useState(user?.name || 'Soumya Ranjan');
+  const [citizenPhone, setCitizenPhone] = useState(user?.phone || '+91 98765 43210');
+  const [citizenEmail, setCitizenEmail] = useState(user?.email || 'citizen@cpgrams.gov.in');
   const [hasDeclared, setHasDeclared] = useState(false);
   const [files, setFiles] = useState<Array<{ name: string; size: number; type: string }>>([]);
+
+  // Auto-sync citizen profile from auth if user logs in
+  useEffect(() => {
+    if (user) {
+      if (user.name) setCitizenName(user.name);
+      if (user.phone) setCitizenPhone(user.phone);
+      if (user.email) setCitizenEmail(user.email);
+    }
+  }, [user]);
   
   // Dynamic taxonomy departments list
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -283,7 +295,7 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
 
     try {
       const payload = {
-        citizenId: 'USR-882910',
+        citizenId: user?.userId || 'USR-882910',
         sessionId: getSessionId(),
         idempotencyKey: `IDEM-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
         narrative: narrative.trim(),
