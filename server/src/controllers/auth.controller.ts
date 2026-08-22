@@ -1,24 +1,24 @@
-import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
-import { env } from '../config/env.js';
-import { cache } from '../config/redis.js';
-import { User, IUser } from '../models/User.js';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { env } from "../config/env.js";
+import { cache } from "../config/redis.js";
+import { User, IUser } from "../models/User.js";
+import { AuthenticatedRequest } from "../middleware/auth.js";
 
 // Seed Mock Users for instant testing
 const MOCK_CITIZEN: Partial<IUser> = {
-  userId: 'USR-882910',
-  name: 'Soumya Ranjan',
-  phone: '+919876543210',
-  email: 'soumya@example.com',
-  role: 'CITIZEN',
+  userId: "USR-882910",
+  name: "Soumya Ranjan",
+  phone: "+919876543210",
+  email: "soumya@example.com",
+  role: "CITIZEN",
   phoneVerified: true,
   emailVerified: true,
   address: {
-    pinCode: '751001',
-    locality: 'Saheed Nagar',
-    district: 'Khordha',
-    state: 'Odisha',
+    pinCode: "751001",
+    locality: "Saheed Nagar",
+    district: "Khordha",
+    state: "Odisha",
   },
 };
 
@@ -28,14 +28,15 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
   if (!phone && !email) {
     res.status(400).json({
       success: false,
-      error: 'PHONE_OR_EMAIL_REQUIRED',
-      message: 'Please provide either a mobile number or email address to receive OTP.',
+      error: "PHONE_OR_EMAIL_REQUIRED",
+      message:
+        "Please provide either a mobile number or email address to receive OTP.",
     });
     return;
   }
 
   const identifier = phone || email;
-  const mockOtp = '123456'; // Standard testing OTP
+  const mockOtp = "123456"; // Standard testing OTP
 
   // Store in cache for 5 minutes (300 seconds)
   await cache.setex(`otp:${identifier}`, 300, mockOtp);
@@ -43,7 +44,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
   res.status(200).json({
     success: true,
     message: `Verification code sent to ${identifier}.`,
-    debugOtp: process.env.NODE_ENV === 'development' ? mockOtp : undefined,
+    debugOtp: process.env.NODE_ENV === "development" ? mockOtp : undefined,
     expiresInSeconds: 300,
   });
 };
@@ -55,8 +56,8 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
   if (!identifier || !otp) {
     res.status(400).json({
       success: false,
-      error: 'MISSING_FIELDS',
-      message: 'Identifier (phone/email) and OTP are required.',
+      error: "MISSING_FIELDS",
+      message: "Identifier (phone/email) and OTP are required.",
     });
     return;
   }
@@ -64,11 +65,12 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
   const cachedOtp = await cache.get(`otp:${identifier}`);
 
   // Allow standard mock OTP 123456 or cached OTP
-  if (otp !== '123456' && cachedOtp !== otp) {
+  if (otp !== "123456" && cachedOtp !== otp) {
     res.status(400).json({
       success: false,
-      error: 'INVALID_OTP',
-      message: 'Invalid or expired verification code. Use 123456 for instant verification.',
+      error: "INVALID_OTP",
+      message:
+        "Invalid or expired verification code. Use 123456 for instant verification.",
     });
     return;
   }
@@ -86,12 +88,12 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
       const generatedId = `USR-${Math.floor(100000 + Math.random() * 900000)}`;
       user = await User.create({
         userId: generatedId,
-        name: name || 'Citizen User',
-        phone: phone || '+919876543210',
+        name: name || "Citizen User",
+        phone: phone || "+919876543210",
         phoneVerified: Boolean(phone),
         email: email || undefined,
         emailVerified: Boolean(email),
-        role: 'CITIZEN',
+        role: "CITIZEN",
         lastLoginAt: new Date(),
       });
     } else {
@@ -115,19 +117,23 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
   };
 
   const accessToken = jwt.sign(tokenPayload, env.JWT_SECRET, {
-    expiresIn: '15m',
+    expiresIn: "15m",
   });
 
   const refreshToken = jwt.sign(tokenPayload, env.JWT_REFRESH_SECRET, {
-    expiresIn: '7d',
+    expiresIn: "7d",
   });
 
   // Track session activity in cache for 30-minute idle timeout
-  await cache.setex(`session:activity:${user.userId}`, 1800, Date.now().toString());
+  await cache.setex(
+    `session:activity:${user.userId}`,
+    1800,
+    Date.now().toString(),
+  );
 
   res.status(200).json({
     success: true,
-    message: 'Authentication successful.',
+    message: "Authentication successful.",
     data: {
       user: {
         userId: user.userId,
@@ -140,14 +146,17 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
       },
       accessToken,
       refreshToken,
-      expiresIn: '15m',
+      expiresIn: "15m",
     },
   });
 };
 
-export const getMe = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const getMe = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
   if (!req.user) {
-    res.status(401).json({ success: false, error: 'UNAUTHORIZED' });
+    res.status(401).json({ success: false, error: "UNAUTHORIZED" });
     return;
   }
 
