@@ -1,7 +1,14 @@
 import React from 'react';
-import { ArrowUpRight, ShieldCheck, PhoneCall } from 'lucide-react';
+import { ArrowUpRight, ShieldCheck, PhoneCall, ArrowUp } from 'lucide-react';
 
 export const Footer: React.FC = () => {
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <footer className="mt-20 border-t border-slate-200 bg-slate-50 text-slate-600 font-sans w-full max-w-full">
       {/* Main Footer Container */}
@@ -100,17 +107,31 @@ export const Footer: React.FC = () => {
 
         </div>
 
-        {/* Bottom Legal bar */}
+        {/* Bottom Legal bar & Back to Top button */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-slate-500 text-xs sm:text-sm gap-4">
           <p>&copy; {new Date().getFullYear()} Government of India. Designed with citizen-intent principles.</p>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-medium">
-            <span className="hover:text-[#0A2540] cursor-pointer">Citizen Charter</span>
-            <span>&bull;</span>
-            <span className="hover:text-[#0A2540] cursor-pointer">Privacy Policy</span>
-            <span>&bull;</span>
-            <span className="hover:text-[#0A2540] cursor-pointer">Terms of Service</span>
-            <span>&bull;</span>
-            <span className="hover:text-[#0A2540] cursor-pointer">Accessibility</span>
+          
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-medium">
+              <span className="hover:text-[#0A2540] cursor-pointer">Citizen Charter</span>
+              <span>&bull;</span>
+              <span className="hover:text-[#0A2540] cursor-pointer">Privacy Policy</span>
+              <span>&bull;</span>
+              <span className="hover:text-[#0A2540] cursor-pointer">Terms of Service</span>
+              <span>&bull;</span>
+              <span className="hover:text-[#0A2540] cursor-pointer">Accessibility</span>
+            </div>
+
+            {/* Back to Top Button */}
+            <button
+              onClick={scrollToTop}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-slate-200 hover:border-[#2563EB] hover:text-[#2563EB] text-[#0A2540] font-bold text-xs sm:text-sm shadow-2xs transition-all duration-200 cursor-pointer shrink-0 group"
+              title="Scroll back to top of page"
+              aria-label="Back to top"
+            >
+              <span>Back to Top</span>
+              <ArrowUp className="w-4 h-4 text-[#2563EB] group-hover:-translate-y-0.5 transition-transform" />
+            </button>
           </div>
         </div>
 
