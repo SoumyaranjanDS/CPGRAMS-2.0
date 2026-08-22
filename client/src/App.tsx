@@ -1,39 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Lock } from 'lucide-react';
 import axios from 'axios';
 import { Layout } from './components/layout/Layout.js';
-import { Button } from './components/common/Button.js';
-import { Alert } from './components/common/Alert.js';
-import { Input } from './components/common/Input.js';
-import { Modal } from './components/common/Modal.js';
 import { HomePage } from './pages/HomePage.js';
 import { SuccessPage } from './pages/SuccessPage.js';
 import { IntakeWorkflow } from './components/intake/IntakeWorkflow.js';
 import { VoiceDictationModal } from './components/home/VoiceDictationModal.js';
 import { QuickTrackModal } from './components/home/QuickTrackModal.js';
+import { AuthModal } from './components/auth/AuthModal.js';
+import { useAuth } from './context/AuthContext.js';
 import { Department } from './types/index.js';
 
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthModalOpen, closeAuthModal } = useAuth();
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [deptLoading, setDeptLoading] = useState(true);
 
-  // Modals state
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  // Global Modals state
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isTrackModalOpen, setIsTrackModalOpen] = useState(false);
 
   // Active Grievance filing state
   const [initialNarrative, setInitialNarrative] = useState('');
   const [lodgedGrievanceId, setLodgedGrievanceId] = useState<string | null>(null);
-
-  // Mock User
-  const [mockUser, setMockUser] = useState<any>(null);
-  const [otpPhone, setOtpPhone] = useState('+91 98765 43210');
-  const [otpCode, setOtpCode] = useState('123456');
 
   // Fetch Departments from Backend API
   const fetchDepartments = async () => {
@@ -79,16 +71,6 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSimulateLogin = () => {
-    setMockUser({
-      name: 'Soumya Ranjan',
-      phone: otpPhone,
-      role: 'CITIZEN',
-      userId: 'USR-882910',
-    });
-    setIsAuthModalOpen(false);
-  };
-
   return (
     <Layout
       currentView={getCurrentView()}
@@ -106,8 +88,6 @@ export function App() {
           navigate(view);
         }
       }}
-      user={mockUser}
-      onLoginClick={() => setIsAuthModalOpen(true)}
       onLodgeClick={() => handleStartComplaint()}
     >
       <Routes>
@@ -191,6 +171,12 @@ export function App() {
 
       {/* ================= GLOBAL MODALS ================= */}
 
+      {/* Auth Modal with OTP & Role Presets */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={closeAuthModal}
+      />
+
       {/* Voice Dictation Modal */}
       <VoiceDictationModal
         isOpen={isVoiceModalOpen}
@@ -204,50 +190,6 @@ export function App() {
         onClose={() => setIsTrackModalOpen(false)}
         initialId={lodgedGrievanceId || 'GRV-2026-004821'}
       />
-
-      {/* Citizen Authentication Modal */}
-      <Modal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        title={
-          <div className="flex items-center gap-2 text-[#0A2540]">
-            <Lock className="w-5 h-5 text-blue-700" />
-            <span>Citizen Authentication &bull; OTP Verification</span>
-          </div>
-        }
-        description="Statutory identity verification preserving your active session state."
-        maxWidth="md"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setIsAuthModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={handleSimulateLogin} className="font-bold">
-              Verify OTP &amp; Sign In
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <Input
-            label="Mobile Number / Email Address"
-            value={otpPhone}
-            onChange={(e) => setOtpPhone(e.target.value)}
-            helperText="A 6-digit verification code will be dispatched."
-          />
-          <Input
-            label="6-Digit Verification Code (OTP)"
-            value={otpCode}
-            onChange={(e) => setOtpCode(e.target.value)}
-            placeholder="123456"
-            helperText="Demo test OTP is 123456"
-          />
-          <Alert variant="info">
-            Authentication is required to link registered complaints to your citizen record for
-            official DARPG correspondence.
-          </Alert>
-        </div>
-      </Modal>
     </Layout>
   );
 }
