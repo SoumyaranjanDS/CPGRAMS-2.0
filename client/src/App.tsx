@@ -4,17 +4,16 @@ import axios from 'axios';
 import { Layout } from './components/layout/Layout.js';
 import { HomePage } from './pages/HomePage.js';
 import { SuccessPage } from './pages/SuccessPage.js';
+import { RegistrationPage } from './pages/RegistrationPage.js';
+import { LoginPage } from './pages/LoginPage.js';
 import { IntakeWorkflow } from './components/intake/IntakeWorkflow.js';
 import { VoiceDictationModal } from './components/home/VoiceDictationModal.js';
 import { QuickTrackModal } from './components/home/QuickTrackModal.js';
-import { AuthModal } from './components/auth/AuthModal.js';
-import { useAuth } from './context/AuthContext.js';
 import { Department } from './types/index.js';
 
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthModalOpen, closeAuthModal } = useAuth();
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [deptLoading, setDeptLoading] = useState(true);
@@ -48,6 +47,8 @@ export function App() {
   const getCurrentView = () => {
     if (location.pathname.startsWith('/lodge') || location.pathname.startsWith('/intake')) return 'lodge';
     if (location.pathname.startsWith('/success')) return 'success';
+    if (location.pathname.startsWith('/registration') || location.pathname.startsWith('/register')) return 'registration';
+    if (location.pathname.startsWith('/login') || location.pathname.startsWith('/signin')) return 'login';
     return 'home';
   };
 
@@ -105,7 +106,16 @@ export function App() {
           }
         />
 
-        {/* ================= ROUTE 2: INTAKE / LODGE COMPLAINT ================= */}
+        {/* ================= ROUTE 2: OFFICIAL CITIZEN REGISTRATION PAGE ================= */}
+        <Route path="/registration" element={<RegistrationPage />} />
+        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/signup" element={<RegistrationPage />} />
+
+        {/* ================= ROUTE 3: SIGN IN PAGE ================= */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signin" element={<LoginPage />} />
+
+        {/* ================= ROUTE 4: INTAKE / LODGE COMPLAINT ================= */}
         <Route
           path="/lodge"
           element={
@@ -133,7 +143,7 @@ export function App() {
           }
         />
 
-        {/* ================= ROUTE 3: SUCCESS CONFIRMATION RECEIPT ================= */}
+        {/* ================= ROUTE 5: SUCCESS CONFIRMATION RECEIPT ================= */}
         <Route
           path="/success/:id"
           element={
@@ -170,12 +180,6 @@ export function App() {
       </Routes>
 
       {/* ================= GLOBAL MODALS ================= */}
-
-      {/* Auth Modal with OTP & Role Presets */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={closeAuthModal}
-      />
 
       {/* Voice Dictation Modal */}
       <VoiceDictationModal
