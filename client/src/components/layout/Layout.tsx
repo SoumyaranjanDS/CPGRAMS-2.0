@@ -6,8 +6,6 @@ export interface LayoutProps {
   children: React.ReactNode;
   currentView?: string;
   onNavigate?: (view: string) => void;
-  user?: any;
-  onLoginClick?: () => void;
   onLodgeClick?: () => void;
 }
 
@@ -15,8 +13,6 @@ export const Layout: React.FC<LayoutProps> = ({
   children,
   currentView = 'home',
   onNavigate,
-  user,
-  onLoginClick,
   onLodgeClick,
 }) => {
   return (
@@ -24,8 +20,6 @@ export const Layout: React.FC<LayoutProps> = ({
       <Navbar
         currentView={currentView}
         onNavigate={onNavigate}
-        user={user}
-        onLoginClick={onLoginClick}
         onLodgeClick={onLodgeClick}
       />
       {/* pt-16 on mobile (h-16), pt-20 on sm+ (h-20) */}
