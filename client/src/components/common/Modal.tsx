@@ -47,34 +47,36 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-150 font-sans">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-2.5 sm:p-4 md:p-6 animate-in fade-in duration-150 font-sans">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-[#0A0A0B]/50 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-[#0A0A0B]/60 backdrop-blur-xs transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidthStyles[maxWidth]} bg-white rounded-xl shadow-xl border border-[#E4E4E7] overflow-hidden transform transition-all z-10`}
+        className={`relative w-full ${maxWidthStyles[maxWidth]} bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all z-10 max-h-[92vh] sm:max-h-[88vh] flex flex-col`}
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
         {(title || description) && (
-          <div className="px-6 pt-5 pb-4 border-b border-[#E4E4E7] flex items-start justify-between gap-4">
-            <div>
+          <div className="px-4 sm:px-6 pt-4 pb-3 sm:pt-5 sm:pb-4 border-b border-slate-100 flex items-start justify-between gap-3 shrink-0">
+            <div className="flex-1 min-w-0">
               {title && (
-                <h3 className="text-base font-semibold text-[#0A0A0B] leading-6 tracking-tight">{title}</h3>
+                <div className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
+                  {title}
+                </div>
               )}
               {description && (
-                <p className="mt-0.5 text-xs text-[#71717A]">{description}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{description}</p>
               )}
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-1 text-[#71717A] hover:text-[#0A0A0B] hover:bg-[#F4F4F5] transition-colors cursor-pointer"
+              className="rounded-full p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
               aria-label="Close dialog"
             >
               <X className="w-4 h-4" />
@@ -83,11 +85,11 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Content Body */}
-        <div className="px-6 py-5 max-h-[calc(100vh-180px)] overflow-y-auto">{children}</div>
+        <div className="px-4 py-3.5 sm:px-6 sm:py-5 overflow-y-auto flex-1">{children}</div>
 
         {/* Optional Footer */}
         {footer && (
-          <div className="px-6 py-3.5 bg-[#FAFAFA] border-t border-[#E4E4E7] flex items-center justify-end gap-2.5">
+          <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2 shrink-0">
             {footer}
           </div>
         )}
