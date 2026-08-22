@@ -8,10 +8,11 @@ import {
   ArrowLeft,
   RotateCcw,
   ShieldCheck,
+  ShieldAlert,
 } from 'lucide-react';
-import { Card } from '../components/common/Card.js';
 import { Button } from '../components/common/Button.js';
 import { Alert } from '../components/common/Alert.js';
+import { FloatingInput } from '../components/common/FloatingInput.js';
 import { useAuth } from '../context/AuthContext.js';
 
 export const LoginPage: React.FC = () => {
@@ -104,83 +105,73 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-10 text-left animate-in fade-in duration-200">
+    <div className="max-w-md mx-auto px-4 py-12 text-left font-sans animate-in fade-in duration-200">
       
       {/* Header */}
-      <div className="text-center space-y-2 mb-6">
+      <div className="text-center space-y-2.5 mb-8">
         <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-[#2563EB] flex items-center justify-center mx-auto shadow-2xs">
           <Lock className="w-6 h-6" />
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0A2540] tracking-tight">
           Sign In to CPGRAMS 2.0
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
+        <p className="text-sm sm:text-[15px] text-slate-600 max-w-sm mx-auto leading-relaxed">
           National public grievance redressal portal for Citizens &amp; Government Officers.
         </p>
       </div>
 
-      {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
+      {error && <Alert variant="danger" className="mb-5">{error}</Alert>}
 
       {notRegistered && (
-        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2 mb-4 text-xs text-amber-900">
-          <p className="font-bold">No account found with this identifier.</p>
-          <p>You can complete registration in less than a minute.</p>
+        <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2 mb-5 text-sm text-amber-900 leading-relaxed">
+          <div className="flex items-center gap-2 font-bold">
+            <ShieldAlert className="w-4 h-4 text-amber-600" />
+            <span>No account found with this identifier</span>
+          </div>
+          <p>Please register to create your verified Citizen profile.</p>
           <Link
             to="/registration"
-            className="inline-flex items-center gap-1 font-bold text-[#6F0047] hover:underline pt-1"
+            className="inline-flex items-center gap-1.5 font-bold text-[#6F0047] hover:underline pt-1"
           >
-            <span>Go to Citizen Registration Form</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>Complete Citizen Registration</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       )}
 
-      <Card padding="lg" className="bg-white border-slate-200 shadow-xs rounded-2xl">
+      {/* Clean Open Form Layout without Card Box */}
+      <div className="space-y-6">
         {step === 1 && (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+          <form onSubmit={handleSendOtp} className="space-y-5">
             
-            {/* Identifier */}
-            <div className="space-y-1.5">
-              <label className="text-xs sm:text-sm font-bold text-slate-800 block">
-                Registered Mobile Number or Email <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g. +91 98XXXXXXXX or email@gov.in"
-                  required
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-                />
-                <Smartphone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-              </div>
-              <span className="text-[11px] text-slate-400 block">
-                Government officers can enter their official department email.
-              </span>
-            </div>
+            {/* Google-Style Floating Input: Identifier */}
+            <FloatingInput
+              label="Registered Mobile Number or Email"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              required
+              leftIcon={<Smartphone className="w-4 h-4" />}
+              autoFocus
+            />
 
-            {/* Captcha */}
-            <div className="space-y-1.5 pt-1">
-              <label className="text-xs sm:text-sm font-bold text-slate-800 block">
-                Security Code <span className="text-red-500">*</span>
-              </label>
+            {/* Captcha Input & Visual Box */}
+            <div className="space-y-2">
               <div className="flex items-center gap-3">
-                <input
-                  type="text"
+                <FloatingInput
+                  label="Security Code"
                   value={securityInput}
                   onChange={(e) => setSecurityInput(e.target.value)}
-                  placeholder="Enter captcha"
                   required
-                  className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
                 />
-                <div className="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 select-none tracking-widest text-base font-serif italic font-bold text-slate-800 shadow-inner">
+                
+                <div className="px-4 py-3 rounded-xl bg-slate-100 border border-slate-300 select-none tracking-widest text-lg font-serif italic font-bold text-slate-800 shadow-inner shrink-0 min-w-[100px] text-center">
                   {captchaCode}
                 </div>
+
                 <button
                   type="button"
                   onClick={generateNewCaptcha}
-                  className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+                  className="p-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer shrink-0"
                   title="Refresh Captcha"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -192,7 +183,7 @@ export const LoginPage: React.FC = () => {
               type="submit"
               variant="primary"
               isLoading={isLoading}
-              className="w-full justify-center font-bold text-xs sm:text-sm py-3 bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs mt-2"
+              className="w-full justify-center font-bold text-sm sm:text-base py-3.5 bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs mt-2"
               rightIcon={<ArrowRight className="w-4 h-4" />}
             >
               Get Verification Code (OTP)
@@ -201,11 +192,11 @@ export const LoginPage: React.FC = () => {
         )}
 
         {step === 2 && (
-          <form onSubmit={handleVerifyOtp} className="space-y-4 animate-in fade-in duration-200">
-            <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between text-xs">
+          <form onSubmit={handleVerifyOtp} className="space-y-5 animate-in fade-in duration-200">
+            <div className="p-3.5 rounded-xl bg-blue-50/80 border border-blue-200 flex items-center justify-between text-sm">
               <div>
-                <span className="text-slate-500 block">OTP Code sent to:</span>
-                <strong className="text-[#0A2540] font-bold">{identifier}</strong>
+                <span className="text-slate-500 block text-xs">OTP Code sent to:</span>
+                <strong className="text-[#0A2540] font-bold text-sm">{identifier}</strong>
               </div>
               <button
                 type="button"
@@ -216,45 +207,40 @@ export const LoginPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs sm:text-sm font-bold text-slate-800 block">
-                Enter 6-Digit OTP Code <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={otp}
-                  maxLength={6}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="123456"
-                  required
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-center font-mono text-xl tracking-widest font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-                />
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-              </div>
-              <div className="p-2 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-xs text-emerald-800">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Demo Testing OTP: <strong>123456</strong></span>
-              </div>
+            {/* Floating Input: OTP */}
+            <FloatingInput
+              label="6-Digit Verification Code (OTP)"
+              value={otp}
+              maxLength={6}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+              leftIcon={<KeyRound className="w-4 h-4" />}
+              className="text-center font-mono text-xl tracking-widest font-bold"
+              autoFocus
+            />
+
+            <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-2 text-xs sm:text-sm text-emerald-800">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Default testing OTP: <strong>123456</strong></span>
             </div>
 
             <Button
               type="submit"
               variant="primary"
               isLoading={isLoading}
-              className="w-full justify-center font-bold text-xs sm:text-sm py-3 bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs"
+              className="w-full justify-center font-bold text-sm sm:text-base py-3.5 bg-[#2563EB] hover:bg-[#1D4ED8] shadow-xs"
               rightIcon={<ArrowRight className="w-4 h-4" />}
             >
               Verify OTP &amp; Sign In
             </Button>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+            <div className="flex items-center justify-between text-sm text-slate-600 pt-1">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 cursor-pointer"
+                className="inline-flex items-center gap-1 hover:text-slate-900 cursor-pointer font-medium"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
               </button>
 
@@ -263,7 +249,7 @@ export const LoginPage: React.FC = () => {
                 onClick={handleSendOtp}
                 className="inline-flex items-center gap-1 text-[#2563EB] font-bold hover:underline cursor-pointer"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-4 h-4" />
                 <span>Resend OTP</span>
               </button>
             </div>
@@ -271,13 +257,13 @@ export const LoginPage: React.FC = () => {
         )}
 
         {/* Footer Navigation */}
-        <div className="pt-5 mt-5 border-t border-slate-100 text-center text-xs text-slate-600">
+        <div className="pt-6 border-t border-slate-200 text-center text-sm text-slate-600">
           New to CPGRAMS?{' '}
           <Link to="/registration" className="text-[#6F0047] font-extrabold hover:underline">
             Register as a Citizen
           </Link>
         </div>
-      </Card>
+      </div>
 
     </div>
   );
