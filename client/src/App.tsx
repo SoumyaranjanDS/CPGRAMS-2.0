@@ -6,14 +6,19 @@ import { HomePage } from './pages/HomePage.js';
 import { SuccessPage } from './pages/SuccessPage.js';
 import { RegistrationPage } from './pages/RegistrationPage.js';
 import { LoginPage } from './pages/LoginPage.js';
-import { IntakeWorkflow } from './components/intake/IntakeWorkflow.js';
+import { CitizenDashboardPage } from './pages/CitizenDashboardPage.js';
+import { NotFoundPage } from './pages/NotFoundPage.js';
+import { DirectIssueIntakeForm } from './components/dashboard/DirectIssueIntakeForm.js';
 import { VoiceDictationModal } from './components/home/VoiceDictationModal.js';
 import { QuickTrackModal } from './components/home/QuickTrackModal.js';
+import { PublicOnlyRoute } from './components/common/ProtectedRoute.js';
+import { useAuth } from './context/AuthContext.js';
 import { Department } from './types/index.js';
 
 export function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [deptLoading, setDeptLoading] = useState(true);
@@ -45,6 +50,7 @@ export function App() {
 
   // Compute current view name based on pathname for navbar highlight
   const getCurrentView = () => {
+    if (location.pathname.startsWith('/dashboard')) return 'dashboard';
     if (location.pathname.startsWith('/lodge') || location.pathname.startsWith('/intake')) return 'lodge';
     if (location.pathname.startsWith('/success')) return 'success';
     if (location.pathname.startsWith('/registration') || location.pathname.startsWith('/register')) return 'registration';
@@ -56,13 +62,13 @@ export function App() {
     if (initialText) {
       setInitialNarrative(initialText);
     }
-    navigate('/lodge');
+    navigate('/dashboard?tab=lodge');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleVoiceTranscriptReady = (transcript: string) => {
     setInitialNarrative(transcript);
-    navigate('/lodge');
+    navigate('/dashboard?tab=lodge');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -80,6 +86,12 @@ export function App() {
           setIsTrackModalOpen(true);
         } else if (view === 'home') {
           navigate('/');
+        } else if (view === 'dashboard') {
+          if (isAuthenticated) {
+            navigate('/dashboard');
+          } else {
+            navigate('/login?redirect=' + encodeURIComponent('/dashboard'));
+          }
         } else if (view === 'directory') {
           navigate('/');
           setTimeout(() => {
@@ -106,24 +118,27 @@ export function App() {
           }
         />
 
-        {/* ================= ROUTE 2: OFFICIAL CITIZEN REGISTRATION PAGE ================= */}
-        <Route path="/registration" element={<RegistrationPage />} />
-        <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/signup" element={<RegistrationPage />} />
+        {/* ================= ROUTE 2: OFFICIAL CITIZEN REGISTRATION PAGE (PUBLIC ONLY) ================= */}
+        <Route path="/registration" element={<PublicOnlyRoute><RegistrationPage /></PublicOnlyRoute>} />
+        <Route path="/register" element={<PublicOnlyRoute><RegistrationPage /></PublicOnlyRoute>} />
+        <Route path="/signup" element={<PublicOnlyRoute><RegistrationPage /></PublicOnlyRoute>} />
 
-        {/* ================= ROUTE 3: SIGN IN PAGE ================= */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signin" element={<LoginPage />} />
+        {/* ================= ROUTE 3: SIGN IN PAGE (PUBLIC ONLY) ================= */}
+        <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
+        <Route path="/signin" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
 
-        {/* ================= ROUTE 4: INTAKE / LODGE COMPLAINT ================= */}
+        {/* ================= ROUTE 4: CITIZEN DASHBOARD ================= */}
+        <Route path="/dashboard" element={<CitizenDashboardPage />} />
+        <Route path="/dashboard/:tab" element={<CitizenDashboardPage />} />
+
+        {/* ================= ROUTE 5: INTAKE / LODGE COMPLAINT ================= */}
         <Route
           path="/lodge"
           element={
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <IntakeWorkflow
+            <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
+              <DirectIssueIntakeForm
                 initialNarrative={initialNarrative}
                 onSuccess={handleComplaintSuccess}
-                onCancel={() => navigate('/')}
                 onOpenVoiceModal={() => setIsVoiceModalOpen(true)}
               />
             </div>
@@ -132,18 +147,17 @@ export function App() {
         <Route
           path="/intake"
           element={
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <IntakeWorkflow
+            <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-5">
+              <DirectIssueIntakeForm
                 initialNarrative={initialNarrative}
                 onSuccess={handleComplaintSuccess}
-                onCancel={() => navigate('/')}
                 onOpenVoiceModal={() => setIsVoiceModalOpen(true)}
               />
             </div>
           }
         />
 
-        {/* ================= ROUTE 5: SUCCESS CONFIRMATION RECEIPT ================= */}
+        {/* ================= ROUTE 6: SUCCESS CONFIRMATION RECEIPT ================= */}
         <Route
           path="/success/:id"
           element={
@@ -164,18 +178,10 @@ export function App() {
           }
         />
 
-        {/* Fallback to Home */}
+        {/* Fallback 404 Route */}
         <Route
           path="*"
-          element={
-            <HomePage
-              departments={departments}
-              deptLoading={deptLoading}
-              onStartComplaint={handleStartComplaint}
-              onTrackComplaint={() => setIsTrackModalOpen(true)}
-              onOpenVoiceModal={() => setIsVoiceModalOpen(true)}
-            />
-          }
+          element={<NotFoundPage onTrackComplaint={() => setIsTrackModalOpen(true)} />}
         />
       </Routes>
 
