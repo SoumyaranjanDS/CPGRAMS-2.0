@@ -4,6 +4,7 @@ import { ZodError } from 'zod';
 export interface AppError extends Error {
   statusCode?: number;
   code?: string;
+  type?: string;
 }
 
 export const errorHandler = (
@@ -12,6 +13,16 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ): void => {
+  // Handle Malformed JSON payload syntax error
+  if (err.type === 'entity.parse.failed' || (err instanceof SyntaxError && 'body' in err)) {
+    res.status(400).json({
+      success: false,
+      error: 'INVALID_JSON_PAYLOAD',
+      message: 'The request body could not be parsed as valid JSON. Please check JSON formatting and quotes.',
+    });
+    return;
+  }
+
   // Handle Zod Validation Errors
   if (err instanceof ZodError) {
     res.status(400).json({
@@ -30,7 +41,7 @@ export const errorHandler = (
   const message = err.message || 'Internal Server Error';
   const code = err.code || 'INTERNAL_SERVER_ERROR';
 
-  console.error(`[${new Date().toISOString()}] Error ${statusCode} on ${req.method} ${req.path}:`, err);
+  console.error(`[${new Date().toISOString()}] Error ${statusCode} on ${req.method} ${req.path}:`, err.message || err);
 
   res.status(statusCode).json({
     success: false,

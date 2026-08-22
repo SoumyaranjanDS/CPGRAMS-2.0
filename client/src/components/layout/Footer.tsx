@@ -10,9 +10,9 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="mt-20 border-t border-slate-200 bg-slate-50 text-slate-600 font-sans w-full max-w-full">
+    <footer className="mt-8 sm:mt-10 border-t border-slate-200 bg-slate-50 text-slate-600 font-sans w-full max-w-full">
       {/* Main Footer Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 space-y-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-10 lg:gap-12 pb-12 border-b border-slate-200 text-left">
           
           {/* Brand Column */}

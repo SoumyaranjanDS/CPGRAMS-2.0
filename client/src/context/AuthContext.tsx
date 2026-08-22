@@ -4,10 +4,11 @@ import { User, UserRole } from '../types/index.js';
 
 export interface RegistrationPayload {
   name: string;
-  gender: 'Male' | 'Female' | 'Transgender';
+  gender: 'Male' | 'Female' | 'Other';
   phone: string;
   phoneStd?: string;
   email: string;
+  password: string;
   address: {
     premise?: string;
     subLocality?: string;
@@ -29,6 +30,10 @@ export interface AuthContextType {
   loginWithOtp: (
     phoneOrEmail: string,
     otp: string
+  ) => Promise<{ success: boolean; error?: string; notRegistered?: boolean; role?: UserRole }>;
+  loginWithPassword: (
+    identifier: string,
+    password: string
   ) => Promise<{ success: boolean; error?: string; notRegistered?: boolean; role?: UserRole }>;
   registerCitizen: (
     payload: RegistrationPayload
@@ -84,7 +89,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // 2. Sign In with OTP (DB-Driven Role Verification)
+  // 2. Sign In with Password (/api/v1/auth/login-password)
+  const loginWithPassword = async (identifier: string, password: string) => {
+    try {
+      const res = await axios.post('/api/v1/auth/login-password', {
+        identifier: identifier.trim(),
+        password: password.trim(),
+      });
+      const authData = res.data.data;
+      const verifiedToken = authData.accessToken;
+      const authenticatedUser: User = authData.user;
+
+      setUser(authenticatedUser);
+      setToken(verifiedToken);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authenticatedUser));
+      localStorage.setItem(AUTH_TOKEN_KEY, verifiedToken);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${verifiedToken}`;
+
+      return {
+        success: true,
+        role: authenticatedUser.role,
+      };
+    } catch (err: any) {
+      const respData = err.response?.data;
+      return {
+        success: false,
+        notRegistered: respData?.notRegistered || false,
+        error: respData?.message || 'Incorrect credentials. Please try again.',
+      };
+    }
+  };
+
+  // 3. Sign In with OTP (DB-Driven Role Verification)
   const loginWithOtp = async (phoneOrEmail: string, otp: string) => {
     try {
       const isEmail = phoneOrEmail.includes('@');
@@ -98,7 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const verifiedToken = authData.accessToken;
       const authenticatedUser: User = authData.user;
 
-      // Pure database-driven role assigned from MongoDB
       setUser(authenticatedUser);
       setToken(verifiedToken);
       localStorage.setItem(AUTH_USER_KEY, JSON.stringify(authenticatedUser));
@@ -119,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // 3. Register Citizen (/api/v1/auth/register)
+  // 4. Register Citizen (/api/v1/auth/register)
   const registerCitizen = async (payload: RegistrationPayload) => {
     try {
       const res = await axios.post('/api/v1/auth/register', payload);
@@ -142,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // 4. Logout
+  // 5. Logout
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -159,6 +194,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         sendOtpRequest,
+        loginWithPassword,
         loginWithOtp,
         registerCitizen,
         logout,

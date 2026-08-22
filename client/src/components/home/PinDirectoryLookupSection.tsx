@@ -29,7 +29,7 @@ export const PinDirectoryLookupSection: React.FC = () => {
   }, []);
 
   return (
-    <Card padding="lg" className="p-6 sm:p-10 space-y-6 border-slate-200 bg-white shadow-xs rounded-2xl text-left w-full max-w-full">
+    <Card id="area-directory" padding="lg" className="p-6 sm:p-10 space-y-6 border-slate-200 bg-white shadow-xs rounded-2xl text-left w-full max-w-full">
       <div className="flex items-start sm:items-center justify-between border-b border-slate-200 pb-5 gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-blue-50 text-[#2563EB]">

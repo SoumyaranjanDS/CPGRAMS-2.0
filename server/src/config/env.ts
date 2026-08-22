@@ -29,6 +29,12 @@ const envSchema = z.object({
     .default(
       process.env.GOOGLE_API_KEY || process.env.VITE_GOOGLE_MAPS_API_KEY || "",
     ),
+  GOOGLE_TRANSLATE_API_KEY: z
+    .string()
+    .optional()
+    .default(
+      process.env.GOOGLE_TRANSLATE_API_KEY || process.env.GOOGLE_API_KEY || "",
+    ),
   GOOGLE_CLIENT_ID: z
     .string()
     .optional()
@@ -41,6 +47,18 @@ const envSchema = z.object({
     .string()
     .optional()
     .default(process.env.GOOGLE_CALLBACK_URL || ""),
+  CLOUDINARY_CLOUD_NAME: z
+    .string()
+    .optional()
+    .default(process.env.CLOUDINARY_CLOUD_NAME || "dvdd218yw"),
+  CLOUDINARY_API_KEY: z
+    .string()
+    .optional()
+    .default(process.env.CLOUDINARY_API_KEY || "489395228146672"),
+  CLOUDINARY_API_SECRET: z
+    .string()
+    .optional()
+    .default(process.env.CLOUDINARY_API_SECRET || "cUE0e2mLQ8k5r-M3KN9m1I9qk3g"),
 });
 
 const _env = envSchema.safeParse(process.env);

@@ -1,11 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema } from 'mongoose';
 
-export type UserRole =
-  | "CITIZEN"
-  | "GRO_OFFICER"
-  | "APPELLATE_OFFICER"
-  | "ADMIN";
-export type UserGender = "Male" | "Female" | "Transgender";
+export type UserRole = 'CITIZEN' | 'GRO_OFFICER' | 'APPELLATE_OFFICER' | 'ADMIN';
+export type UserGender = 'Male' | 'Female' | 'Other';
 
 export interface IUserAddress {
   premise?: string;
@@ -26,6 +22,7 @@ export interface IUser extends Document {
   phoneVerified: boolean;
   email?: string;
   emailVerified: boolean;
+  passwordHash?: string;
   role: UserRole;
   departmentId?: string; // For officers
   designation?: string;
@@ -42,11 +39,11 @@ const UserSchema = new Schema<IUser>(
     name: { type: String, required: true, trim: true },
     gender: {
       type: String,
-      enum: ["Male", "Female", "Transgender"],
-      default: "Male",
+      enum: ['Male', 'Female', 'Other'],
+      default: 'Male',
     },
     phone: { type: String, required: true, unique: true, index: true },
-    phoneStd: { type: String, default: "" },
+    phoneStd: { type: String, default: '' },
     phoneVerified: { type: Boolean, default: false },
     email: {
       type: String,
@@ -56,29 +53,30 @@ const UserSchema = new Schema<IUser>(
       index: true,
     },
     emailVerified: { type: Boolean, default: false },
+    passwordHash: { type: String, select: false },
     role: {
       type: String,
-      enum: ["CITIZEN", "GRO_OFFICER", "APPELLATE_OFFICER", "ADMIN"],
-      default: "CITIZEN",
+      enum: ['CITIZEN', 'GRO_OFFICER', 'APPELLATE_OFFICER', 'ADMIN'],
+      default: 'CITIZEN',
       index: true,
     },
     departmentId: { type: String, default: null },
     designation: { type: String, default: null },
     address: {
-      premise: { type: String, default: "" },
-      subLocality: { type: String, default: "" },
-      locality: { type: String, default: "" },
-      country: { type: String, default: "India" },
-      state: { type: String, default: "" },
-      district: { type: String, default: "" },
-      pinCode: { type: String, default: "" },
+      premise: { type: String, default: '' },
+      subLocality: { type: String, default: '' },
+      locality: { type: String, default: '' },
+      country: { type: String, default: 'India' },
+      state: { type: String, default: '' },
+      district: { type: String, default: '' },
+      pinCode: { type: String, default: '' },
     },
     isActive: { type: Boolean, default: true },
     lastLoginAt: { type: Date },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-export const User = mongoose.model<IUser>("User", UserSchema);
+export const User = mongoose.model<IUser>('User', UserSchema);

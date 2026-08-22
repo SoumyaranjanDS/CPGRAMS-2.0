@@ -45,8 +45,9 @@ const generateDraftId = (): string => {
  */
 export const submitComplaint = async (req: Request, res: Response): Promise<void> => {
   try {
+    const authenticatedUserId = (req as any).user?.userId;
     const {
-      citizenId = 'CITIZEN-GUEST',
+      citizenId = authenticatedUserId || 'CITIZEN-GUEST',
       idempotencyKey = `IDEM-${Date.now()}-${Math.random()}`,
       narrative,
       rawInput,
@@ -353,10 +354,15 @@ export const getComplaintById = async (req: Request, res: Response): Promise<voi
  */
 export const listComplaints = async (req: Request, res: Response): Promise<void> => {
   try {
+    const authenticatedUser = (req as any).user;
     const { citizenId, status, departmentId, limit = 20, page = 1 } = req.query;
 
     const filter: any = {};
-    if (citizenId) filter.citizenId = citizenId;
+    if (citizenId) {
+      filter.citizenId = citizenId;
+    } else if (authenticatedUser?.role === 'CITIZEN' || authenticatedUser?.userId) {
+      filter.citizenId = authenticatedUser.userId;
+    }
     if (status) filter.status = status;
     if (departmentId) filter['assignedDepartment.departmentId'] = departmentId;
 

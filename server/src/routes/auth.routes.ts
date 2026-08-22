@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   registerUser,
+  loginWithPassword,
   sendOtp,
   verifyOtp,
   getMe,
@@ -13,6 +14,7 @@ const router = Router();
 
 // Registration & Verification
 router.post('/register', registerUser);
+router.post('/login-password', loginWithPassword);
 router.post('/send-otp', sendOtp);
 router.post('/verify-otp', verifyOtp);
 

@@ -1,5 +1,5 @@
 export type UserRole = 'CITIZEN' | 'GRO_OFFICER' | 'APPELLATE_OFFICER' | 'ADMIN';
-export type UserGender = 'Male' | 'Female' | 'Transgender';
+export type UserGender = 'Male' | 'Female' | 'Other';
 
 export interface User {
   userId: string;
@@ -11,6 +11,7 @@ export interface User {
   role: UserRole;
   departmentId?: string;
   designation?: string;
+  lastLoginAt?: string | Date;
   address?: {
     premise?: string;
     subLocality?: string;
@@ -49,25 +50,34 @@ export interface Category {
 
 export type ComplaintStatus =
   | 'DRAFT'
+  | 'PENDING'
   | 'SUBMITTED'
   | 'RECEIVED'
   | 'ASSIGNED'
   | 'UNDER_REVIEW'
+  | 'IN_PROGRESS'
   | 'ADDITIONAL_INFO_REQUIRED'
   | 'ACTION_IN_PROGRESS'
   | 'RESOLVED'
+  | 'DISPOSED_RESOLVED'
   | 'RESOLUTION_DISPUTED'
   | 'APPEAL_SUBMITTED'
+  | 'APPEAL_ASSIGNED'
+  | 'APPEAL_UNDER_REVIEW'
+  | 'APPEAL_DISPOSED'
   | 'APPEAL_RESOLVED'
+  | 'REJECTED'
   | 'CLOSED';
 
 export interface Complaint {
+  _id?: string;
+  id?: string;
   grievanceId: string;
   citizenId: string;
-  category: {
-    categoryId: string;
-    mainCategory: string;
-    subCategory: string;
+  category?: {
+    categoryId?: string;
+    mainCategory?: string;
+    subCategory?: string;
     confidenceScore?: number;
   };
   assignedDepartment: {
@@ -77,26 +87,30 @@ export interface Complaint {
     assignedAt?: string;
   };
   narrative: string;
-  location: {
+  location?: {
     pinCode: string;
     state: string;
     district: string;
-    locality: string;
+    locality?: string;
+    addressLine?: string;
     landmark?: string;
   };
-  attachments: Array<{
-    fileId: string;
-    fileName: string;
-    fileUrl: string;
-    fileSize: number;
-    fileType: string;
-    uploadedAt: string;
+  attachments?: Array<{
+    fileId?: string;
+    name?: string;
+    fileName?: string;
+    fileUrl?: string;
+    fileSize?: number;
+    size?: number;
+    fileType?: string;
+    type?: string;
+    uploadedAt?: string;
   }>;
   status: ComplaintStatus;
-  slaDueDate: string;
-  isOverdue: boolean;
+  slaDueDate?: string;
+  isOverdue?: boolean;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface LocalDraft {

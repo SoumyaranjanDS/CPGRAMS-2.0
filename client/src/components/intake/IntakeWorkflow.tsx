@@ -11,6 +11,10 @@ import {
   FileText,
   RotateCcw,
   Cloud,
+  Compass,
+  Loader2,
+  Navigation,
+  ExternalLink,
 } from 'lucide-react';
 import axios from 'axios';
 import { Card } from '../common/Card.js';
@@ -21,6 +25,8 @@ import { Badge } from '../common/Badge.js';
 import { Alert } from '../common/Alert.js';
 import { Stepper } from '../common/Stepper.js';
 import { Department } from '../../types/index.js';
+import { CPGRAMS_ORGANISATIONS } from '../../data/cpgramsOrganisations.js';
+import { detectGPSLocation, lookupPinCode } from '../../utils/locationService.js';
 import {
   saveLocalDraft,
   getLocalDraft,
@@ -57,7 +63,8 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
   const [citizenPhone, setCitizenPhone] = useState(user?.phone || '+91 98765 43210');
   const [citizenEmail, setCitizenEmail] = useState(user?.email || 'citizen@cpgrams.gov.in');
   const [hasDeclared, setHasDeclared] = useState(false);
-  const [files, setFiles] = useState<Array<{ name: string; size: number; type: string }>>([]);
+  const [files, setFiles] = useState<Array<{ fileId?: string; name: string; size: number; type: string; fileUrl?: string; publicId?: string }>>([]);
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
 
   // Auto-sync citizen profile from auth if user logs in
   useEffect(() => {
@@ -174,88 +181,149 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
     setHasRecoverableDraft(false);
   };
 
-  // 6. Real-Time AI Intent & Category Classification
+  // 6. Real-Time AI Department & Intent Classification via Mini Model / Server
   useEffect(() => {
-    if (!narrative.trim()) {
+    if (!narrative.trim() || narrative.trim().length < 4) {
       setDetectedCategory(null);
       return;
     }
 
-    const text = narrative.toLowerCase();
-    if (text.includes('pension') || text.includes('dbt') || text.includes('allowance') || text.includes('old age')) {
-      setDetectedCategory({
-        deptId: 'DEP-OD-01',
-        deptName: 'Department of Social Security & Empowerment (SSEPD)',
-        category: 'Non-Credit / Delay of Monthly Pension',
-        confidence: 96,
-        sla: 21,
-      });
-      setSelectedDeptId('DEP-OD-01');
-      setSelectedDeptName('Department of Social Security & Empowerment (SSEPD)');
-    } else if (text.includes('road') || text.includes('pothole') || text.includes('drain') || text.includes('garbage') || text.includes('sanitation')) {
-      setDetectedCategory({
-        deptId: 'DEP-OD-02',
-        deptName: 'Bhubaneswar Municipal Corporation (BMC)',
-        category: 'Road Hazards & Civic Sanitation',
-        confidence: 94,
-        sla: 21,
-      });
-      setSelectedDeptId('DEP-OD-02');
-      setSelectedDeptName('Bhubaneswar Municipal Corporation (BMC)');
-    } else if (text.includes('power') || text.includes('electric') || text.includes('transformer') || text.includes('voltage') || text.includes('meter')) {
-      setDetectedCategory({
-        deptId: 'DEP-OD-03',
-        deptName: 'TP Central Odisha Distribution Limited (TPCODL)',
-        category: 'Electricity Supply & Burnt Transformer',
-        confidence: 92,
-        sla: 21,
-      });
-      setSelectedDeptId('DEP-OD-03');
-      setSelectedDeptName('TP Central Odisha Distribution Limited (TPCODL)');
-    } else if (text.includes('water') || text.includes('pipe') || text.includes('watco') || text.includes('leak')) {
-      setDetectedCategory({
-        deptId: 'DEP-OD-04',
-        deptName: 'Water Corporation of Odisha (WATCO)',
-        category: 'Drinking Water Pipeline Supply & Contamination',
-        confidence: 93,
-        sla: 21,
-      });
-      setSelectedDeptId('DEP-OD-04');
-      setSelectedDeptName('Water Corporation of Odisha (WATCO)');
-    } else {
-      setDetectedCategory({
-        deptId: 'DEP-GEN-01',
-        deptName: 'General Administrative / Public Service Delivery',
-        category: 'Citizen Grievance under Review',
-        confidence: 88,
-        sla: 21,
-      });
-    }
+    const timer = setTimeout(() => {
+      axios
+        .post('/api/v1/ai/classify-department', {
+          text: narrative.trim(),
+          departments: CPGRAMS_ORGANISATIONS.map((o) => ({
+            id: o.id,
+            code: o.code,
+            name: o.name,
+            category: o.category,
+          })),
+        })
+        .then((res) => {
+          if (res.data?.success && res.data.data) {
+            const ai = res.data.data;
+            setDetectedCategory({
+              deptId: ai.departmentCode,
+              deptName: ai.departmentName,
+              category: `${ai.category} • ${ai.subCategory}`,
+              confidence: Math.round(ai.confidenceScore * 100),
+              sla: 21,
+              reasoning: ai.reasoning,
+              source: res.data.source,
+            });
+            setSelectedDeptId(ai.departmentCode);
+            setSelectedDeptName(ai.departmentName);
+          }
+        })
+        .catch(() => {});
+    }, 450);
+
+    return () => clearTimeout(timer);
   }, [narrative]);
+
+  // Location state
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [locationFeedback, setLocationFeedback] = useState<string | null>(null);
+  const [suggestedPostOffices, setSuggestedPostOffices] = useState<string[]>([]);
+
+  // Auto-detect GPS Location handler
+  const handleDetectGPS = async () => {
+    setIsDetectingLocation(true);
+    setLocationFeedback(null);
+    try {
+      const loc = await detectGPSLocation();
+      if (loc.pinCode) {
+        setPinCode(loc.pinCode);
+        saveLocalDraft({ pinCode: loc.pinCode });
+      }
+      if (loc.locality) {
+        setLocality(loc.locality);
+        saveLocalDraft({ locality: loc.locality });
+      }
+      if (loc.postOffices && loc.postOffices.length > 0) {
+        setSuggestedPostOffices(loc.postOffices);
+      }
+      setLocationDetails({
+        state: loc.state,
+        district: loc.district,
+        subDivision: loc.locality,
+        localBody: `${loc.district} Municipal Administration`,
+      });
+      setLocationFeedback('📍 Location detected successfully via GPS!');
+      setTimeout(() => setLocationFeedback(null), 5000);
+    } catch (err: any) {
+      console.warn('GPS detection note:', err);
+      setLocationFeedback(err.message || 'Could not detect GPS location. Please enter your 6-digit PIN code.');
+    } finally {
+      setIsDetectingLocation(false);
+    }
+  };
 
   // 7. PIN Code Cascade Lookup
   useEffect(() => {
     if (pinCode.length === 6) {
-      axios
-        .get(`/api/v1/taxonomy/pin/${pinCode}`)
-        .then((res) => {
-          setLocationDetails(res.data.data);
-        })
-        .catch(() => {
-          setLocationDetails(null);
-        });
+      lookupPinCode(pinCode).then((res) => {
+        if (res) {
+          setLocationDetails({
+            state: res.state,
+            district: res.district,
+            subDivision: res.locality,
+            localBody: `${res.district} Administration`,
+          });
+          if (res.postOffices && res.postOffices.length > 0) {
+            setSuggestedPostOffices(res.postOffices);
+            if (!locality.trim() && res.locality) {
+              setLocality(res.locality);
+              saveLocalDraft({ locality: res.locality });
+            }
+          }
+        }
+      });
     }
   }, [pinCode]);
 
-  // 8. File Upload Simulator
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files).map((f) => ({
+  // 8. File Upload to Cloudinary with Multer
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFiles = e.target.files;
+    if (!uploadedFiles || uploadedFiles.length === 0) return;
+
+    const formData = new FormData();
+    for (let i = 0; i < uploadedFiles.length; i++) {
+      const f = uploadedFiles[i];
+      if (f.size > 10 * 1024 * 1024) continue;
+      formData.append('files', f);
+    }
+
+    setIsUploadingFiles(true);
+    try {
+      const res = await axios.post('/api/v1/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (res.data?.success && res.data.files) {
+        const cloudFiles = res.data.files.map((f: any) => ({
+          fileId: f.fileId,
+          name: f.fileName,
+          size: f.fileSize,
+          type: f.fileType,
+          fileUrl: f.fileUrl,
+          publicId: f.publicId,
+        }));
+        setFiles((prev) => [...prev, ...cloudFiles]);
+      }
+    } catch (uploadErr: any) {
+      console.warn('Cloudinary upload fallback in workflow:', uploadErr);
+      const fallbackList = Array.from(uploadedFiles).map((f) => ({
         name: f.name,
         size: f.size,
         type: f.type,
       }));
-      setFiles((prev) => [...prev, ...newFiles]);
+      setFiles((prev) => [...prev, ...fallbackList]);
+    } finally {
+      setIsUploadingFiles(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -319,9 +387,9 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
           landmark: landmark || '',
         },
         attachments: files.map((f, idx) => ({
-          fileId: `FILE-${Date.now()}-${idx}`,
+          fileId: f.fileId || `FILE-${Date.now()}-${idx}`,
           fileName: f.name,
-          fileUrl: `/uploads/mock-${f.name}`,
+          fileUrl: f.fileUrl || '',
           fileSize: f.size,
           fileType: f.type || 'application/pdf',
         })),
@@ -462,11 +530,11 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
 
           {/* AI Intent Triage Card */}
           {detectedCategory && (
-            <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-200 space-y-2 animate-in fade-in duration-200">
+            <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-200 space-y-2.5 animate-in fade-in duration-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#2563EB] uppercase tracking-wider">
                   <Sparkles className="w-4 h-4" />
-                  <span>AI Smart Triage Recommendation</span>
+                  <span>AI Smart Department Recommendation</span>
                 </div>
                 <Badge variant="blue" size="sm" className="font-bold">
                   {detectedCategory.confidence}% Match
@@ -484,6 +552,11 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
                   </strong>
                 </div>
               </div>
+              {detectedCategory.reasoning && (
+                <div className="text-xs text-slate-700 bg-white/80 p-2.5 rounded-lg border border-blue-100 italic">
+                  💡 {detectedCategory.reasoning}
+                </div>
+              )}
             </div>
           )}
 
@@ -495,26 +568,44 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
                   Supporting Documents / Photos (Optional)
                 </label>
                 <p className="text-xs text-slate-500">
-                  Attach sanction letters, bill receipts, passbook copy, or site photos (PDF, JPG, PNG up to 5MB).
+                  Attach sanction letters, bill receipts, passbook copy, or site photos (PDF, JPG, PNG up to 10MB).
                 </p>
               </div>
               <button
                 type="button"
+                disabled={isUploadingFiles}
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold cursor-pointer border border-slate-200 shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#2563EB] text-xs font-semibold cursor-pointer border border-blue-200 shrink-0 transition-colors"
               >
-                <Upload className="w-3.5 h-3.5 text-[#2563EB]" />
-                <span>Add Document</span>
+                {isUploadingFiles ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#2563EB]" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-3.5 h-3.5 text-[#2563EB]" />
+                    <span>Upload to Cloudinary</span>
+                  </>
+                )}
               </button>
               <input
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.jpg,.jpeg,.png"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                 onChange={handleFileUpload}
                 className="hidden"
               />
             </div>
+
+            {/* Uploading indicator */}
+            {isUploadingFiles && (
+              <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-200 text-xs text-blue-800 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 text-[#2563EB] animate-spin shrink-0" />
+                <span>Uploading attachments securely to Cloudinary...</span>
+              </div>
+            )}
 
             {/* Attached Files List */}
             {files.length > 0 && (
@@ -526,8 +617,26 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
                   >
                     <div className="flex items-center gap-2 truncate">
                       <FileText className="w-4 h-4 text-[#2563EB] shrink-0" />
-                      <span className="font-semibold text-slate-800 truncate">{file.name}</span>
+                      {file.fileUrl ? (
+                        <a
+                          href={file.fileUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-semibold text-[#2563EB] hover:underline truncate flex items-center gap-1"
+                        >
+                          <span className="truncate">{file.name}</span>
+                          <ExternalLink className="w-3 h-3 shrink-0 opacity-70" />
+                        </a>
+                      ) : (
+                        <span className="font-semibold text-slate-800 truncate">{file.name}</span>
+                      )}
                       <span className="text-slate-400">({(file.size / 1024).toFixed(1)} KB)</span>
+                      {file.fileUrl && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <Cloud className="w-2.5 h-2.5" />
+                          Cloudinary
+                        </span>
+                      )}
                     </div>
                     <button
                       type="button"
@@ -564,14 +673,44 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
       {/* ================= STEP 2: LOCATION & AUTHORITY SELECTION ================= */}
       {step === 2 && (
         <Card padding="lg" className="space-y-6 border-slate-200 bg-white shadow-xs rounded-2xl">
-          <div className="space-y-1">
-            <h3 className="text-lg sm:text-xl font-bold text-[#0A2540]">
-              Jurisdiction &amp; Department Mapping
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600">
-              Verify your postal PIN code to automatically assign the concerned territorial authority.
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <h3 className="text-lg sm:text-xl font-bold text-[#0A2540]">
+                Jurisdiction &amp; Department Mapping
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600">
+                Auto-detect your location using GPS or enter your 6-digit PIN code.
+              </p>
+            </div>
+
+            {/* GPS 1-Click Detect Button */}
+            <button
+              type="button"
+              onClick={handleDetectGPS}
+              disabled={isDetectingLocation}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-bold transition-all cursor-pointer shrink-0 shadow-2xs"
+            >
+              {isDetectingLocation ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                  <span>Detecting GPS Location...</span>
+                </>
+              ) : (
+                <>
+                  <Compass className="w-4 h-4 text-emerald-600" />
+                  <span>Auto-Detect Current Location</span>
+                </>
+              )}
+            </button>
           </div>
+
+          {/* Location Feedback Toast */}
+          {locationFeedback && (
+            <div className="p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200 text-xs text-emerald-800 font-semibold flex items-center gap-2 animate-in fade-in">
+              <Navigation className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>{locationFeedback}</span>
+            </div>
+          )}
 
           {/* PIN Code Cascade Lookup */}
           <div className="space-y-4">
@@ -581,23 +720,51 @@ export const IntakeWorkflow: React.FC<IntakeWorkflowProps> = ({
                 value={pinCode}
                 maxLength={6}
                 onChange={(e) => {
-                  const val = e.target.value;
+                  const val = e.target.value.replace(/\D/g, '');
                   setPinCode(val);
                   saveLocalDraft({ pinCode: val });
                 }}
-                leftIcon={<MapPin className="w-4 h-4" />}
+                leftIcon={<MapPin className="w-4 h-4 text-[#2563EB]" />}
                 helperText="Enter 6-digit PIN code (e.g. 751001, 751024, 110001)"
               />
 
-              <Input
-                label="Locality / Ward / Street Address"
-                value={locality}
-                placeholder="E.g. Unit-4, Bhouma Nagar"
-                onChange={(e) => {
-                  setLocality(e.target.value);
-                  saveLocalDraft({ locality: e.target.value });
-                }}
-              />
+              <div className="space-y-1.5">
+                <Input
+                  label="Locality / Ward / Street Address"
+                  value={locality}
+                  placeholder="E.g. Unit-4, Bhouma Nagar"
+                  onChange={(e) => {
+                    setLocality(e.target.value);
+                    saveLocalDraft({ locality: e.target.value });
+                  }}
+                />
+
+                {/* Suggested Localities under PIN */}
+                {suggestedPostOffices.length > 0 && (
+                  <div className="pt-1 flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block w-full">
+                      Post Offices under PIN {pinCode}:
+                    </span>
+                    {suggestedPostOffices.slice(0, 6).map((po, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setLocality(po);
+                          saveLocalDraft({ locality: po });
+                        }}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-semibold border transition-all cursor-pointer ${
+                          locality.toLowerCase().includes(po.toLowerCase())
+                            ? 'bg-[#2563EB] text-white border-[#2563EB]'
+                            : 'bg-white text-slate-700 hover:bg-blue-50 border-slate-200'
+                        }`}
+                      >
+                        {po}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Resolved Location Box */}
