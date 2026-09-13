@@ -8,7 +8,6 @@ const startServer = async () => {
   console.log('    Mission: Reimagining India\'s Public Digital Infrastructure');
   console.log('================================================================');
 
-  // Attempt database connection
   await connectDB();
 
   const server = app.listen(env.PORT, () => {
